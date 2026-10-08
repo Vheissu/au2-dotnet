@@ -39,7 +39,7 @@ jobs:
           git diff --exit-code -- src/Starter.Web/src/api/generated/schema.d.ts
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: browser-test-results
