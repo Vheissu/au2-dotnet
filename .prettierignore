@@ -1,0 +1,11 @@
+package-lock.json
+**/packages.lock.json
+**/bin/
+**/obj/
+**/dist/
+**/generated/
+.artifacts/
+output/
+playwright-report/
+test-results/
+LICENSE

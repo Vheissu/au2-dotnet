@@ -1,0 +1,66 @@
+<a class="skip-link" href="#main" external click.trigger:prevent="focusMain()">Skip to content</a>
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Sidebar">
+    <a class="brand" load="route: workspace; context.bind: null" aria-label="Aurelia .NET home">
+      <span class="brand-mark" aria-hidden="true">a</span>
+      <span>
+        aurelia
+        <span class="brand-suffix">/ .NET</span>
+      </span>
+    </a>
+    <div class="sidebar-section">YOUR STARTER</div>
+    <nav class="navigation" aria-label="Main navigation">
+      <a
+        load="route: workspace; context.bind: null; active.bind: workspaceActive"
+        aria-current.bind="workspaceActive ? 'page' : null"
+      >
+        <span aria-hidden="true">◫</span>
+        Workspace
+      </a>
+      <a
+        load="route: guide; context.bind: null; active.bind: guideActive"
+        aria-current.bind="guideActive ? 'page' : null"
+      >
+        <span aria-hidden="true">▤</span>
+        Starter guide
+      </a>
+    </nav>
+    <div class="sidebar-note">
+      <span class="small-label">A PLACE TO BEGIN</span>
+      <p>
+        Your next idea,
+        <br />
+        with a head start.
+      </p>
+      <a href="https://github.com/Vheissu/au2-dotnet" external>
+        View repository
+        <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <span class="small-dot" aria-hidden="true"></span>
+      Aurelia 2
+      <span class="muted">+ .NET 10</span>
+    </div>
+  </aside>
+  <div class="main-column">
+    <header class="topbar">
+      <span>
+        Starter project
+        <span class="breadcrumb-divider">/</span>
+        <span class="muted">Make it yours</span>
+      </span>
+      <a href="https://docs.aurelia.io" external>
+        Aurelia docs
+        <span aria-hidden="true">↗</span>
+      </a>
+    </header>
+    <main id="main" tabindex="-1" ref="mainElement"><au-viewport></au-viewport></main>
+    <footer class="page-footer">
+      <span>Made for your next application.</span>
+      <a href="https://learn.microsoft.com/aspnet/core/?view=aspnetcore-10.0" external>
+        ASP.NET Core docs ↗
+      </a>
+    </footer>
+  </div>
+</div>

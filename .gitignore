@@ -1,0 +1,17 @@
+node_modules/
+dist/
+**/bin/
+**/obj/
+**/App_Data/
+.artifacts/
+output/
+playwright-report/
+test-results/
+coverage/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.user
+*.suo
+.idea/

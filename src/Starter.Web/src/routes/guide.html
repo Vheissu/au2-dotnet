@@ -1,0 +1,100 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">THE STARTER GUIDE</p>
+    <h1>A stack you can follow.</h1>
+    <p class="lead">A small working example, with clear places to add your own code.</p>
+  </div>
+</section>
+<section class="guide-intro">
+  <h2>One request, end to end.</h2>
+  <p>
+    The workspace sends a typed request to an ASP.NET Core endpoint. Entity Framework Core writes
+    the change to SQLite and the response updates the view.
+  </p>
+  <div class="request-flow">
+    <span>Aurelia view</span>
+    <b aria-hidden="true">→</b>
+    <span>Typed client</span>
+    <b aria-hidden="true">→</b>
+    <span>.NET endpoint</span>
+    <b aria-hidden="true">→</b>
+    <span>SQLite</span>
+  </div>
+</section>
+<section class="guide-section">
+  <h2>Find your starting point</h2>
+  <dl class="file-guide">
+    <div>
+      <dt>Build an interface</dt>
+      <dd>
+        <code>src/Starter.Web/src/routes/</code>
+        <p>
+          Lazy-loaded routes, HTML templates, and plain TypeScript view models. Styles live in one
+          CSS file.
+        </p>
+      </dd>
+    </div>
+    <div>
+      <dt>Add a feature</dt>
+      <dd>
+        <code>src/Starter.Api/Features/</code>
+        <p>Keep endpoints and request contracts together. WorkItems is the example to follow.</p>
+      </dd>
+    </div>
+    <div>
+      <dt>Change the data</dt>
+      <dd>
+        <code>src/Starter.Api/Data/</code>
+        <p>
+          The database context and migrations live here. Create a migration when the model changes.
+        </p>
+      </dd>
+    </div>
+    <div>
+      <dt>Prove it works</dt>
+      <dd>
+        <code>tests/ · e2e/ · src/Starter.Web/test/</code>
+        <p>
+          API integration tests use isolated SQLite databases. Browser tests exercise the running
+          application.
+        </p>
+      </dd>
+    </div>
+  </dl>
+</section>
+<section class="guide-section">
+  <h2>Useful commands</h2>
+  <div class="command-list">
+    <div>
+      <code>npm run dev</code>
+      <span>Start the API and frontend together</span>
+    </div>
+    <div>
+      <code>npm run check</code>
+      <span>Lint, typecheck, test, and build</span>
+    </div>
+    <div>
+      <code>npm run test:e2e</code>
+      <span>Run browser and accessibility checks</span>
+    </div>
+    <div>
+      <code>npm run api:types</code>
+      <span>Regenerate TypeScript contracts from OpenAPI</span>
+    </div>
+    <div>
+      <code>npm run publish</code>
+      <span>Build a single deployable .NET application</span>
+    </div>
+  </div>
+</section>
+<section class="guide-note">
+  <h2>Before you make it public</h2>
+  <p>
+    The sample workspace is shared and has no sign-in. Add authentication and per-user authorization
+    before storing private data. The README covers deployment, database migrations, and the
+    starter’s boundaries.
+  </p>
+  <a href="https://github.com/Vheissu/au2-dotnet#readme" external>
+    Read the project documentation ↗
+  </a>
+</section>

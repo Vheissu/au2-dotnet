@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - run: npm ci
+      - run: dotnet restore --locked-mode
+      - run: dotnet tool restore
+      - run: npm run format:check
+      - run: npm run check
+      - name: Check generated contracts
+        run: |
+          npm run api:types
+          git diff --exit-code -- src/Starter.Web/src/api/generated/schema.d.ts
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+      - name: Build container
+        run: docker build -t au2-dotnet:ci .
+      - name: Smoke test container as non-root
+        run: |
+          docker run --detach --rm --name starter --publish 127.0.0.1:8080:8080 --env Database__ApplyMigrations=true au2-dotnet:ci
+          trap 'docker logs starter; docker stop starter' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/health; then break; fi
+            sleep 1
+          done
+          curl --fail http://127.0.0.1:8080/health
+          curl --fail http://127.0.0.1:8080/guide
+          curl --fail --header 'Content-Type: application/json' --data '{"title":"Container smoke test"}' http://127.0.0.1:8080/api/work-items

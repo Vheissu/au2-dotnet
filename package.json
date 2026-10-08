@@ -1,0 +1,39 @@
+{
+  "name": "au2-dotnet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "src/Starter.Web"
+  ],
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others --names api,web --prefix-colors cyan,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "node scripts/dotnet.mjs watch --project src/Starter.Api run",
+    "dev:web": "npm run dev --workspace src/Starter.Web",
+    "build": "npm run build:web && node scripts/dotnet.mjs build --configuration Release",
+    "build:web": "npm run build --workspace src/Starter.Web",
+    "test": "npm run test:web && npm run test:api",
+    "test:web": "npm test --workspace src/Starter.Web",
+    "test:api": "node scripts/dotnet.mjs test --configuration Release",
+    "test:e2e": "playwright test",
+    "lint": "npm run lint --workspace src/Starter.Web",
+    "typecheck": "npm run typecheck --workspace src/Starter.Web",
+    "format": "prettier --write . && node scripts/dotnet.mjs format",
+    "format:check": "prettier --check . && node scripts/dotnet.mjs format --verify-no-changes",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "api:types": "node scripts/api-types.mjs",
+    "db:migrate": "node scripts/dotnet.mjs ef database update --project src/Starter.Api",
+    "publish": "npm run build:web && node scripts/dotnet.mjs publish src/Starter.Api -c Release -o .artifacts/publish && node scripts/copy-web.mjs",
+    "start": "node scripts/start.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.64.0",
+    "concurrently": "10.0.6",
+    "openapi-typescript": "7.13.0",
+    "prettier": "3.9.9"
+  }
+}

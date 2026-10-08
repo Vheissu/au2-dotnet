@@ -1,0 +1,216 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">AURELIA 2 + ASP.NET CORE</p>
+    <h1>A fresh start.</h1>
+    <p class="lead">The foundations are here. What will you build?</p>
+  </div>
+  <a class="button secondary" load="route: guide; context.bind: null">
+    Explore the starter
+    <span aria-hidden="true">↗</span>
+  </a>
+</section>
+<section class="welcome-banner" aria-labelledby="welcome-title">
+  <div class="welcome-copy">
+    <span class="banner-label">YOUR WORKING EXAMPLE</span>
+    <h2 id="welcome-title">Small tasks. Real full stack.</h2>
+    <p>
+      Add a task below. Every change travels through the .NET API
+      <br class="desktop-break" />
+      and into SQLite, ready to be there when you come back.
+    </p>
+    <a load="route: guide; context.bind: null">
+      See how it fits together
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+  <div class="stack-illustration" aria-hidden="true">
+    <div class="stack-layer layer-back">
+      SQLite
+      <span>DATA</span>
+    </div>
+    <div class="stack-layer layer-middle">
+      .NET 10
+      <span>API</span>
+    </div>
+    <div class="stack-layer layer-front">
+      aurelia 2
+      <span>WEB</span>
+    </div>
+  </div>
+</section>
+<div class="workspace-layout">
+  <section class="task-panel" aria-labelledby="tasks-title" aria-busy.bind="busy">
+    <div class="section-title">
+      <div>
+        <h2 id="tasks-title">
+          Your workspace
+          <span class="count-badge">${items.length}</span>
+        </h2>
+        <p>A little list to try things out.</p>
+      </div>
+      <button class="text-button" click.trigger="refresh()" disabled.bind="busy">
+        Refresh
+        <span aria-hidden="true">↻</span>
+      </button>
+    </div>
+    <form class="add-form" submit.trigger:prevent="add()">
+      <label class="sr-only" for="new-task">New task</label>
+      <input
+        id="new-task"
+        placeholder="What would you like to build?"
+        value.bind="title"
+        maxlength="120"
+        required
+        disabled.bind="isSaving"
+        autocomplete="off"
+      />
+      <button class="button primary" type="submit" disabled.bind="busy || !title.trim()">
+        ${isSaving ? 'Adding…' : 'Add task'}
+        <span aria-hidden="true">+</span>
+      </button>
+    </form>
+    <div class="error-banner" if.bind="error" role="alert">
+      <strong>We couldn’t save or load your tasks.</strong>
+      <p>${error}</p>
+      <button class="text-button" click.trigger="refresh()" disabled.bind="busy">
+        Refresh and try again
+      </button>
+    </div>
+    <div class="list-toolbar">
+      <div class="filters" role="group" aria-label="Filter tasks">
+        <button
+          class.bind="filter === 'all' ? 'selected' : ''"
+          aria-pressed.bind="filter === 'all'"
+          click.trigger="filter = 'all'"
+        >
+          All tasks
+        </button>
+        <button
+          class.bind="filter === 'active' ? 'selected' : ''"
+          aria-pressed.bind="filter === 'active'"
+          click.trigger="filter = 'active'"
+        >
+          Active
+        </button>
+        <button
+          class.bind="filter === 'complete' ? 'selected' : ''"
+          aria-pressed.bind="filter === 'complete'"
+          click.trigger="filter = 'complete'"
+        >
+          Completed
+        </button>
+      </div>
+      <span class="list-count">${activeCount} remaining</span>
+    </div>
+    <div class="loading-state" if.bind="isLoading" role="status">Loading your workspace…</div>
+    <ul class="task-list" else>
+      <li
+        repeat.for="item of visibleItems; key: id"
+        class="task-row"
+        completed.class="item.isComplete"
+      >
+        <div class="task-main" if.bind="editingId !== item.id">
+          <button
+            class="task-check"
+            aria-label.bind="(item.isComplete ? 'Reopen ' : 'Complete ') + item.title"
+            aria-pressed.bind="item.isComplete"
+            disabled.bind="busy"
+            click.trigger="toggle(item)"
+          >
+            <span aria-hidden="true">${item.isComplete ? '✓' : ''}</span>
+          </button>
+          <span class="task-title">${item.title}</span>
+          <span class="task-actions">
+            <button
+              class="text-button"
+              aria-label.bind="'Edit ' + item.title"
+              disabled.bind="busy"
+              click.trigger="startEditing(item)"
+            >
+              Edit
+            </button>
+            <button
+              class="text-button"
+              aria-label.bind="'Delete ' + item.title"
+              disabled.bind="busy"
+              click.trigger="deleteId = item.id"
+            >
+              Delete
+            </button>
+          </span>
+        </div>
+        <form class="edit-form" else submit.trigger:prevent="save(item)">
+          <label class="sr-only" for="edit-${item.id}">Task title</label>
+          <input
+            id="edit-${item.id}"
+            value.bind="editTitle"
+            maxlength="120"
+            required
+            focus.to-view="editingId === item.id"
+          />
+          <button class="text-button" type="submit" disabled.bind="busy || !editTitle.trim()">
+            Save
+          </button>
+          <button
+            class="text-button"
+            type="button"
+            click.trigger="cancelEditing()"
+            disabled.bind="busy"
+          >
+            Cancel
+          </button>
+        </form>
+        <div class="delete-confirmation" if.bind="deleteId === item.id">
+          <span>Delete this task?</span>
+          <button class="text-button danger" click.trigger="remove(item)" disabled.bind="busy">
+            Yes, delete
+          </button>
+          <button class="text-button" click.trigger="deleteId = null" disabled.bind="busy">
+            Keep task
+          </button>
+        </div>
+      </li>
+    </ul>
+    <div class="empty-state" if.bind="!isLoading && visibleItems.length === 0">
+      <span class="empty-mark" aria-hidden="true">✓</span>
+      <h3>${items.length === 0 ? 'Room for your first idea.' : 'Nothing here just yet.'}</h3>
+      <p>
+        ${items.length === 0 ? 'Add a task above to give your new stack a spin.' : 'Try another
+        filter, or add something new.'}
+      </p>
+    </div>
+    <div class="task-panel-footer">
+      <span class="connection-status">
+        <span class="small-dot" offline.class="!connected" aria-hidden="true"></span>
+        ${connected ? 'Connected to your API' : 'API connection pending'}
+      </span>
+      <span>Saved in SQLite</span>
+    </div>
+    <p class="sr-only" role="status" aria-live="polite">${announcement}</p>
+  </section>
+  <aside class="workspace-aside" aria-label="Workspace information">
+    <section class="progress-panel">
+      <span class="eyebrow">A LITTLE MOMENTUM</span>
+      <div class="progress-number">
+        ${progress}
+        <span>%</span>
+      </div>
+      <p>${completedCount} of ${items.length} tasks completed</p>
+      <progress
+        value.bind="completedCount"
+        max.bind="items.length || 1"
+        aria-label="Tasks completed"
+      ></progress>
+      <p class="progress-note">One thing at a time.</p>
+    </section>
+    <section class="next-panel">
+      <span class="eyebrow">MAKE IT YOURS</span>
+      <h3>Start with the code.</h3>
+      <p>Follow a request from an Aurelia view to a .NET endpoint.</p>
+      <a load="route: guide; context.bind: null">
+        Open the guide
+        <span aria-hidden="true">→</span>
+      </a>
+    </section>
+  </aside>
+</div>
