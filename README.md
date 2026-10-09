@@ -21,7 +21,7 @@ Open **http://127.0.0.1:5173**. The API listens on `http://127.0.0.1:5080`; Vite
 
 The API creates its local SQLite database and applies checked-in migrations in Development. The workspace starts empty. No sample data is inserted into your database.
 
-The npm commands find `dotnet` on your PATH or in `~/.dotnet`. Set `DOTNET_EXECUTABLE` if your SDK lives elsewhere. `.nvmrc` selects Node 24; `.NET` SDK selection is in `global.json`.
+The npm commands find `dotnet` on your PATH or in `~/.dotnet`. Set `DOTNET_EXECUTABLE` if your SDK lives elsewhere. `.nvmrc` selects Node 24, and `global.json` selects the .NET SDK.
 
 ## What's included
 
@@ -124,13 +124,13 @@ dotnet ef migrations add DescribeYourChange --project src/Starter.Api --output-d
 
 Review and commit the migration and model snapshot. Development startup applies pending migrations. For an explicit update, use `npm run db:migrate`.
 
-Configure the connection string with `ConnectionStrings__Database` or .NET user secrets. For example, this uses an absolute database path:
+Configure the connection string with `ConnectionStrings__Database` or .NET user secrets. User secrets need a one-time `dotnet user-secrets init --project src/Starter.Api`, which gives your copy of the project its own secrets ID. This example uses an absolute database path:
 
 ```sh
 ConnectionStrings__Database='Data Source=/absolute/path/starter.db' npm run dev:api
 ```
 
-Create the parent directory first. Relative SQLite paths resolve against the API process's working directory: `src/Starter.Api` for development and `.artifacts/publish` for `npm start`. Local data lives under `App_Data/` and is ignored by Git. To reset development data, stop the API and remove that directory; the next development start recreates the schema.
+The API creates the database's directory on startup. Relative SQLite paths resolve against the API process's working directory: `src/Starter.Api` for development and `.artifacts/publish` for `npm start`. Local data lives under `App_Data/` and is ignored by Git. To reset development data, stop the API and remove that directory; the next development start recreates the schema.
 
 For production, apply migrations as an explicit deployment step, against the target connection string, before starting the new app. Back up the database first. Startup migration is off outside Development unless `Database__ApplyMigrations=true` is explicitly set. A single-instance demo can use that switch; a scaled deployment should have one migration runner.
 
@@ -153,7 +153,9 @@ docker compose up --build
 
 Open **http://127.0.0.1:8080**. Compose binds to localhost and stores SQLite in the `starter-data` volume. The container runs as the .NET image's non-root application user. `docker compose down` keeps the data; adding `--volumes` deletes it.
 
-The Dockerfile builds both projects in separate stages, then copies only their outputs into the ASP.NET runtime image. Configure TLS at your hosting platform or reverse proxy. When using proxy-derived scheme or client IP, configure forwarded headers for trusted proxies before relying on those values.
+The Dockerfile builds both projects in separate stages, then copies only their outputs into the ASP.NET runtime image.
+
+The published host sends `Cache-Control: immutable` for Vite's fingerprinted `/assets` files and `no-cache` for `index.html`, so browsers pick up a new deployment on the next load. Every response also carries `X-Content-Type-Options`, `Referrer-Policy`, and a Content Security Policy that only allows same-origin resources. Extend the policy in `Program.cs` when you add a CDN, web fonts, or analytics. Configure TLS at your hosting platform or reverse proxy. When using proxy-derived scheme or client IP, configure forwarded headers for trusted proxies before relying on those values.
 
 ## Where the starter stops
 
@@ -169,7 +171,7 @@ Vite's development proxy avoids the need for CORS in this setup. A separate fron
 - **A port is already occupied:** stop the other process. Vite intentionally refuses to choose another port. Use `WEB_PORT=5175 npm run dev` to choose a different frontend port. Browser tests reserve `5081`. The contract generator chooses an available port.
 - **The .NET SDK isn't found:** install the SDK, not just the runtime. Check `dotnet --list-sdks`; the selected SDK must satisfy `global.json`.
 - **A task changed elsewhere:** refresh the list, then retry your edit. Version conflicts are deliberate.
-- **SQLite cannot open the database:** check that the parent directory exists and the app user can write to it. Container data belongs in `/app/App_Data`.
+- **SQLite cannot open the database:** check that the app user can create and write to the database's directory. Container data belongs in `/app/App_Data`.
 
 ## References
 

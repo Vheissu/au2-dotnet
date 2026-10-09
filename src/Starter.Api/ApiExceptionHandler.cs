@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,19 +9,29 @@ public sealed class ApiExceptionHandler(IProblemDetailsService problems, ILogger
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken ct)
     {
-        var conflict = exception is DbUpdateConcurrencyException;
-        if (!conflict) logger.LogError(exception, "Request failed. Trace ID: {TraceId}", context.TraceIdentifier);
-        context.Response.StatusCode = conflict ? StatusCodes.Status409Conflict : StatusCodes.Status500InternalServerError;
+        var (status, title, detail) = exception switch
+        {
+            // Malformed JSON or missing required values. Development throws these instead of writing a 400.
+            BadHttpRequestException badRequest =>
+                (badRequest.StatusCode, "The request is invalid", "Check the request and try again."),
+            // Another request saved the same row between this request's read and write.
+            DbUpdateConcurrencyException =>
+                (StatusCodes.Status409Conflict, "This resource has changed", "Reload it and try again."),
+            _ => (StatusCodes.Status500InternalServerError, "Something went wrong", "Please try again later.")
+        };
+
+        if (status >= StatusCodes.Status500InternalServerError)
+        {
+            // Matches the traceId that Problem Details returns to the client.
+            var traceId = Activity.Current?.Id ?? context.TraceIdentifier;
+            logger.LogError(exception, "Request failed. Trace ID: {TraceId}", traceId);
+        }
+
+        context.Response.StatusCode = status;
         return await problems.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = context,
-            ProblemDetails = new()
-            {
-                Status = context.Response.StatusCode,
-                Title = conflict ? "This task has changed" : "Something went wrong",
-                Detail = conflict ? "Refresh the task list and try again." : "Please try again later.",
-                Extensions = { ["traceId"] = context.TraceIdentifier }
-            }
+            ProblemDetails = new() { Status = status, Title = title, Detail = detail }
         });
     }
 }

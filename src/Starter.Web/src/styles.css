@@ -36,7 +36,9 @@ a {
 button {
   cursor: pointer;
 }
-button:disabled {
+/* Busy controls use aria-disabled so they keep keyboard focus while a request is in flight. */
+button:disabled,
+button[aria-disabled='true'] {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -281,7 +283,7 @@ main {
   background: var(--accent);
   color: #fff;
 }
-.button.primary:hover:not(:disabled) {
+.button.primary:hover:not(:disabled, [aria-disabled='true']) {
   background: #92115f;
 }
 .welcome-banner {
@@ -411,7 +413,7 @@ main {
   color: #8b5b7e;
   min-height: 34px;
 }
-.text-button:hover:not(:disabled) {
+.text-button:hover:not(:disabled, [aria-disabled='true']) {
   color: #971567;
   text-decoration: underline;
 }

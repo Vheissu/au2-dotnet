@@ -62,7 +62,7 @@ export interface components {
             title: string;
             isComplete: boolean;
             /** Format: uuid */
-            version: null | string;
+            version: string;
         };
         WorkItemResponse: {
             /** Format: uuid */

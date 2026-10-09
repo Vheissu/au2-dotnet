@@ -1,0 +1,4 @@
+# Normalise line endings so Prettier and dotnet format agree on every platform.
+* text=auto eol=lf
+*.png binary
+*.ico binary

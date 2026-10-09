@@ -94,6 +94,27 @@ describe('Workspace', () => {
     expect(vm.progress).toBe(0);
   });
 
+  it('ignores row actions while a request is in flight', async () => {
+    const { vm, api } = setup();
+    await vm.refresh();
+    let finish!: (value: WorkItem) => void;
+    api.update.mockReturnValue(
+      new Promise<WorkItem>((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const pending = vm.toggle(item);
+    vm.startEditing(item);
+    vm.confirmDelete(item);
+    await vm.toggle(item);
+    expect(vm.editingId).toBeNull();
+    expect(vm.deleteId).toBeNull();
+    expect(api.update).toHaveBeenCalledTimes(1);
+    finish({ ...item, isComplete: true, version: 'v2' });
+    await pending;
+    expect(vm.items[0]?.isComplete).toBe(true);
+  });
+
   it('aborts pending requests when navigating away without showing an error', async () => {
     const { vm, api } = setup();
     api.list.mockImplementation(

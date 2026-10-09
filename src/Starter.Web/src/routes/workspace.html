@@ -48,7 +48,7 @@
         </h2>
         <p>A little list to try things out.</p>
       </div>
-      <button class="text-button" click.trigger="refresh()" disabled.bind="busy">
+      <button class="text-button" click.trigger="refresh()" aria-disabled.bind="busy">
         Refresh
         <span aria-hidden="true">↻</span>
       </button>
@@ -61,10 +61,10 @@
         value.bind="title"
         maxlength="120"
         required
-        disabled.bind="isSaving"
+        readonly.bind="isSaving"
         autocomplete="off"
       />
-      <button class="button primary" type="submit" disabled.bind="busy || !title.trim()">
+      <button class="button primary" type="submit" aria-disabled.bind="busy || !title.trim()">
         ${isSaving ? 'Adding…' : 'Add task'}
         <span aria-hidden="true">+</span>
       </button>
@@ -72,7 +72,7 @@
     <div class="error-banner" if.bind="error" role="alert">
       <strong>We couldn’t save or load your tasks.</strong>
       <p>${error}</p>
-      <button class="text-button" click.trigger="refresh()" disabled.bind="busy">
+      <button class="text-button" click.trigger="refresh()" aria-disabled.bind="busy">
         Refresh and try again
       </button>
     </div>
@@ -114,7 +114,7 @@
             class="task-check"
             aria-label.bind="(item.isComplete ? 'Reopen ' : 'Complete ') + item.title"
             aria-pressed.bind="item.isComplete"
-            disabled.bind="busy"
+            aria-disabled.bind="busy"
             click.trigger="toggle(item)"
           >
             <span aria-hidden="true">${item.isComplete ? '✓' : ''}</span>
@@ -122,24 +122,31 @@
           <span class="task-title">${item.title}</span>
           <span class="task-actions">
             <button
+              id="edit-button-${item.id}"
               class="text-button"
               aria-label.bind="'Edit ' + item.title"
-              disabled.bind="busy"
+              aria-disabled.bind="busy"
               click.trigger="startEditing(item)"
             >
               Edit
             </button>
             <button
+              id="delete-button-${item.id}"
               class="text-button"
               aria-label.bind="'Delete ' + item.title"
-              disabled.bind="busy"
-              click.trigger="deleteId = item.id"
+              aria-disabled.bind="busy"
+              click.trigger="confirmDelete(item)"
             >
               Delete
             </button>
           </span>
         </div>
-        <form class="edit-form" else submit.trigger:prevent="save(item)">
+        <form
+          class="edit-form"
+          else
+          submit.trigger:prevent="save(item)"
+          keydown.trigger:escape="cancelEditing()"
+        >
           <label class="sr-only" for="edit-${item.id}">Task title</label>
           <input
             id="edit-${item.id}"
@@ -148,24 +155,29 @@
             required
             focus.to-view="editingId === item.id"
           />
-          <button class="text-button" type="submit" disabled.bind="busy || !editTitle.trim()">
+          <button class="text-button" type="submit" aria-disabled.bind="busy || !editTitle.trim()">
             Save
           </button>
           <button
             class="text-button"
             type="button"
             click.trigger="cancelEditing()"
-            disabled.bind="busy"
+            aria-disabled.bind="busy"
           >
             Cancel
           </button>
         </form>
         <div class="delete-confirmation" if.bind="deleteId === item.id">
           <span>Delete this task?</span>
-          <button class="text-button danger" click.trigger="remove(item)" disabled.bind="busy">
+          <button class="text-button danger" click.trigger="remove(item)" aria-disabled.bind="busy">
             Yes, delete
           </button>
-          <button class="text-button" click.trigger="deleteId = null" disabled.bind="busy">
+          <button
+            id="keep-${item.id}"
+            class="text-button"
+            click.trigger="cancelDelete(item)"
+            aria-disabled.bind="busy"
+          >
             Keep task
           </button>
         </div>
@@ -173,11 +185,8 @@
     </ul>
     <div class="empty-state" if.bind="!isLoading && visibleItems.length === 0">
       <span class="empty-mark" aria-hidden="true">✓</span>
-      <h3>${items.length === 0 ? 'Room for your first idea.' : 'Nothing here just yet.'}</h3>
-      <p>
-        ${items.length === 0 ? 'Add a task above to give your new stack a spin.' : 'Try another
-        filter, or add something new.'}
-      </p>
+      <h3>${emptyTitle}</h3>
+      <p>${emptyMessage}</p>
     </div>
     <div class="task-panel-footer">
       <span class="connection-status">

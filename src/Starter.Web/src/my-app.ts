@@ -1,6 +1,8 @@
 import { route } from '@aurelia/router';
 
 @route({
+  // The router appends this to each route title: "Workspace | Aurelia + .NET Starter".
+  title: 'Aurelia + .NET Starter',
   routes: [
     { path: '', redirectTo: 'workspace' },
     {
@@ -15,11 +17,10 @@ import { route } from '@aurelia/router';
 })
 export class MyApp {
   mainElement!: HTMLElement;
+  workspaceActive = false;
+  guideActive = false;
 
   focusMain() {
     this.mainElement.focus();
   }
-
-  workspaceActive = false;
-  guideActive = false;
 }

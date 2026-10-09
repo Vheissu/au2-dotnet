@@ -16,6 +16,7 @@
     "openapi-fetch": "0.17.0"
   },
   "devDependencies": {
+    "@aurelia/platform-browser": "2.0.0-rc.2",
     "@aurelia/testing": "2.0.0-rc.2",
     "@aurelia/vite-plugin": "2.0.0-rc.2",
     "@eslint/js": "10.0.1",

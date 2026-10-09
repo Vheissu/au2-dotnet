@@ -43,6 +43,48 @@ test('creates, edits, completes, filters, persists, and deletes a task', async (
   expect(errors).toEqual([]);
 });
 
+test('keeps keyboard focus in place through every task action', async ({ page }) => {
+  await page.goto('/');
+  await expect(page).toHaveTitle('Workspace | Aurelia + .NET Starter');
+  const input = page.getByRole('textbox', { name: 'New task' });
+  await input.fill('First');
+  await input.press('Enter');
+  await expect(page.getByText('First', { exact: true })).toBeVisible();
+  await expect(input).toBeFocused();
+  await input.fill('Second');
+  await input.press('Enter');
+  await expect(page.getByText('Second', { exact: true })).toBeVisible();
+
+  const complete = page.getByRole('button', { name: 'Complete First', exact: true });
+  await complete.focus();
+  await page.keyboard.press('Space');
+  await expect(page.getByRole('button', { name: 'Reopen First', exact: true })).toBeFocused();
+
+  const edit = page.getByRole('button', { name: 'Edit First', exact: true });
+  await edit.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('textbox', { name: 'Task title' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(edit).toBeFocused();
+  await page.keyboard.press('Enter');
+  await page.getByRole('textbox', { name: 'Task title' }).fill('First, renamed');
+  await page.keyboard.press('Enter');
+  await expect(
+    page.getByRole('button', { name: 'Edit First, renamed', exact: true }),
+  ).toBeFocused();
+
+  const remove = page.getByRole('button', { name: 'Delete Second', exact: true });
+  await remove.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Keep task' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(remove).toBeFocused();
+  await page.keyboard.press('Enter');
+  await page.getByRole('button', { name: 'Yes, delete' }).press('Enter');
+  await expect(page.getByText('Second', { exact: true })).toHaveCount(0);
+  await expect(input).toBeFocused();
+});
+
 test('supports direct routes, browser history, and unknown pages', async ({ page }) => {
   await page.goto('/guide');
   await page.keyboard.press('Tab');

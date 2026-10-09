@@ -138,6 +138,40 @@ public sealed class WorkItemTests : IDisposable
         Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/openapi/v1.json")).StatusCode);
     }
 
+    [Fact]
+    public async Task TimestampsKeepTheirUtcMarkerAfterARoundTrip()
+    {
+        using var client = Client;
+        var created = await (await client.PostAsJsonAsync("/api/work-items/", new { title = "When" }))
+            .Content.ReadFromJsonAsync<JsonElement>();
+        var listed = (await client.GetFromJsonAsync<JsonElement>("/api/work-items/"))[0];
+        Assert.EndsWith("Z", created.GetProperty("createdAt").GetString());
+        Assert.Equal(created.GetProperty("createdAt").GetString(), listed.GetProperty("createdAt").GetString());
+    }
+
+    [Fact]
+    public async Task BadRequestsStayClientErrorsInDevelopment()
+    {
+        // Development throws BadHttpRequestException for binding failures rather than writing a 400.
+        using var development = new ApiFactory("Development");
+        using var client = development.CreateClient();
+        var malformed = await client.PostAsync("/api/work-items/",
+            new StringContent("{bad json", Encoding.UTF8, "application/json"));
+        Assert.Equal(HttpStatusCode.BadRequest, malformed.StatusCode);
+        Assert.Equal("application/problem+json", malformed.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.DeleteAsync($"/api/work-items/{Guid.NewGuid()}")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/openapi/v1.json")).StatusCode);
+    }
+
+    [Fact]
+    public async Task ResponsesCarrySecurityHeaders()
+    {
+        using var client = Client;
+        var response = await client.GetAsync("/health");
+        Assert.Equal("nosniff", response.Headers.GetValues("X-Content-Type-Options").Single());
+        Assert.Contains("frame-ancestors 'none'", response.Headers.GetValues("Content-Security-Policy").Single());
+    }
+
     private static async Task<WorkItemResponse> Create(HttpClient client)
     {
         var response = await client.PostAsJsonAsync("/api/work-items/", new { title = "Original" });
