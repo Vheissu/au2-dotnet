@@ -6,7 +6,7 @@ RUN npm ci
 COPY src/Starter.Web src/Starter.Web
 RUN npm run build:web
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS api
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS api
 WORKDIR /source
 COPY global.json Directory.Build.props ./
 COPY src/Starter.Api/Starter.Api.csproj src/Starter.Api/packages.lock.json src/Starter.Api/
