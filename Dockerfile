@@ -14,7 +14,7 @@ RUN dotnet restore src/Starter.Api --locked-mode
 COPY src/Starter.Api src/Starter.Api
 RUN dotnet publish src/Starter.Api -c Release --no-restore -o /publish /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS final
 WORKDIR /app
 COPY --from=api /publish ./
 COPY --from=web /source/src/Starter.Web/dist ./wwwroot
